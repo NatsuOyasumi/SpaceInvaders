@@ -12,6 +12,8 @@ public class Position {
 	public int collision_width;
 	public int collision_height;
 	
+	public float speed = 5;//default
+	
 	public boolean offScreen = false;//for bullets specifically
 	
 	public Position() {
@@ -25,19 +27,20 @@ public class Position {
 		collision_width = 130;
 		collision_height = 120;
 	}
-	public Position(float in_x, float in_y) {
+	public Position(float in_x, float in_y, float s) {
 		x = in_x;
 		y = in_y;
 	}
-	public Position(int in_width, int in_height) {
+	public Position(int in_width, int in_height, float s) {
 		width = in_width;
 		height = in_height;
 	}
-	public Position(float in_x, float in_y, int in_width, int in_height) {
+	public Position(float in_x, float in_y, int in_width, int in_height, float s) {
 		x = in_x;
 		y = in_y;
 		width = in_width;
 		height = in_height;
+		speed = s;
 	}
 	
 	public void setColisionBoundary(float in_x, float in_y, int in_width, int in_height) {
@@ -58,38 +61,38 @@ public class Position {
 	}
 	
 	public void moveLeft() {
-		x -= 5;
-		collision_x -= 5;
+		x -= speed;
+		collision_x -= speed;
 		if(checkOnScreen() == false) {
-			x += 5;
-			collision_x += 5;
+			x += speed;
+			collision_x += speed;
 			offScreen = true;
 		}
 	}
 	public void moveRight() {
-		x += 5;
-		collision_x += 5;
+		x += speed;
+		collision_x += speed;
 		if(checkOnScreen() == false) {
-			x -= 5;
-			collision_x -= 5;
+			x -= speed;
+			collision_x -= speed;
 			offScreen = true;
 		}
 	}
 	public void moveUp() {
-		y -= 5;
-		collision_y -= 5;
+		y -= speed;
+		collision_y -= speed;
 		if(checkOnScreen() == false) {
-			y += 5;
-			collision_y += 5;
+			y += speed;
+			collision_y += speed;
 			offScreen = true;
 		}
 	}
 	public void moveDown() {
-		y += 5;
-		collision_y += 5;
+		y += speed;
+		collision_y += speed;
 		if(checkOnScreen() == false) {
-			y -= 5;
-			collision_y -= 5;
+			y -= speed;
+			collision_y -= speed;
 			offScreen = true;
 		}
 	}

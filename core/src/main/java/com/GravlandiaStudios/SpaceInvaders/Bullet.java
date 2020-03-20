@@ -13,6 +13,7 @@ public class Bullet {
 	public int damage = 7;
 	public boolean fromPlayer = false;//otherwise need to invert texture
 	public boolean drawBulletTailSetting;
+	public float bulletSpeed = 7;
 	
 	public Bullet() {
 		bulletPos = new Position();
@@ -28,12 +29,14 @@ public class Bullet {
 		damage = d;
 		//could be alien or player...
 	}
-	public Bullet(float in_x, float in_y) {
-		bulletPos = new Position(in_x, in_y, 15, 30);
+	public Bullet(float in_x, float in_y, float s, int d, boolean p) {
+		bulletSpeed = s;
+		bulletPos = new Position(in_x, in_y, 15, 30, bulletSpeed);
 		//System.out.println(bulletPos.toString()); System.out.println();
 		bulletPos.setColisionBoundary(bulletPos.x, bulletPos.y, bulletPos.width, bulletPos.height);
 		//System.out.println(bulletPos.toString()); System.out.println();
-		fromPlayer = true;
+		fromPlayer = p;
+		damage = d;
 	}
 	
 	public void setFromPlayer(boolean b) {

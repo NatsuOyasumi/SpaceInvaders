@@ -19,6 +19,7 @@ public class Ship {
 	public int shipHP = 50;//hp until lose a live
 	public int bulletTimeLimit = 35;//35;//75 is slow...
 	public int bulletCounter = bulletTimeLimit;
+	public int bulletDmg = 7;
 	
 	public boolean activePowerUp = false;//handle timer, etc.
 	public boolean speedPowerUp = false;
@@ -30,14 +31,16 @@ public class Ship {
 	public int powerUpTimer = 0;
 	public int powerUpEndTime = 150;
 	
-	public int deathAnimationCounter = 0;
+	public int deathAnimationCounter = 200;
 	public boolean died = false;
 	
 	public int tempCount = 0;
 	
+	//*****If speed powerup, double speed, but only 1/2 it once before setting powerup false
+	
 	public Ship() {
 		shipTexture = new Texture("ship.jpg");
-		shipPos = new Position(SpaceInvaders.WINDOW_WIDTH/2, SpaceInvaders.WINDOW_HEIGHT-180, 200, 175);
+		shipPos = new Position(SpaceInvaders.WINDOW_WIDTH/2, SpaceInvaders.WINDOW_HEIGHT-180, 200, 175, SpaceInvaders.playerSpeed);
 		shipPos.setColisionBoundary(shipPos.x+50, shipPos.y+20, 95, 150);
 		shipBullets = new ArrayList<Bullet>();
 	}
@@ -54,6 +57,12 @@ public class Ship {
 		}
 		else if(died == false) { //don't work until officially alive again
 			//I forgot - if use else ifs, can only move one direction at a time
+			if(Gdx.input.isKeyJustPressed(Keys.I)) {
+				infiniteBulletPowerUp = !infiniteBulletPowerUp;
+			}
+			if(Gdx.input.isKeyJustPressed(Keys.R)) {
+				armorPiercingBulletPowerUp = !armorPiercingBulletPowerUp;
+			}
 			if(Gdx.input.isKeyPressed(Keys.A) || Gdx.input.isKeyPressed(Keys.LEFT)) {
 				shipPos.moveLeft();
 			}
@@ -66,12 +75,19 @@ public class Ship {
 			if(Gdx.input.isKeyPressed(Keys.S) || Gdx.input.isKeyPressed(Keys.DOWN)) {
 				shipPos.moveDown();
 			}
+			
+			if(armorPiercingBulletPowerUp) {
+				bulletDmg = 10000;
+			}
+			else {
+				bulletDmg = 7;
+			}
 
 			bulletCounter++;
 			if((Gdx.input.isKeyPressed(Keys.SPACE) || Gdx.input.isKeyPressed(Keys.ENTER)) && (bulletCounter > bulletTimeLimit || infiniteBulletPowerUp == true) ) {
 				//x --> ship (collision) x + halfway over, y-bulletHeight
 				System.out.println("Every time I say guh, that means bullet. Bullet bullet bullet. . .");
-				shipBullets.add(new Bullet(shipPos.collision_x+(shipPos.collision_width/2), shipPos.collision_y-30));
+				shipBullets.add(new Bullet(shipPos.collision_x+(shipPos.collision_width/2), shipPos.collision_y-30, shipPos.speed, bulletDmg, true ));
 				//Sets collision boundary in constructor. Calling it twice might be messing it up.
 				//shipBullets.get(shipBullets.size()-1).bulletPos.setColisionBoundary(shipPos.collision_x+(shipPos.collision_width/2), shipPos.collision_y+(shipPos.collision_height/2), 15, 30);
 				bulletCounter = 0;
@@ -97,16 +113,16 @@ public class Ship {
 	}
 
 	public void render(Graphics g) {
-		if(died == true && deathAnimationCounter < 200) {
+		if(died == true && deathAnimationCounter > 0) {
 			g.setColor(Color.WHITE);
 			g.scale(3, 3);
 			g.drawString("YOU DIED. . .\n" + deathAnimationCounter, ((SpaceInvaders.WINDOW_WIDTH/2)-50)/3, ((SpaceInvaders.WINDOW_HEIGHT/2)-10)/3);
 			g.clearScaling();
-			deathAnimationCounter++;
+			deathAnimationCounter--;
 		}
-		else if(died == true && deathAnimationCounter >= 200) {
+		else if(died == true && deathAnimationCounter <= 0) {
 			died = false;
-			deathAnimationCounter = 0;
+			deathAnimationCounter = 200;
 		}
 		else {
 			g.drawTexture(shipTexture, shipPos.x, shipPos.y);

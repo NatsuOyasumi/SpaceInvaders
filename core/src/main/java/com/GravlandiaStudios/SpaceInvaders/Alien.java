@@ -13,22 +13,24 @@ public class Alien {
 	public ArrayList<Bullet> alienBullets = new ArrayList<Bullet>();
 	public int timeCount = (int)(Math.random()*394820) % 250;
 	public int alienHP = 30;//100	
+	public int alienDmg = 7;
 	
 	public Alien() {
 		alienPos = new Position();
-		alienHP = 100;
+		alienPos.speed = SpaceInvaders.alienSpeed;
+		alienHP = 30;
 		alienPos.setColisionBoundary(alienPos.x+40, alienPos.y+40, 130, 120);
 	}
 	public Alien(Position pos) {
 		alienPos = pos;
 		alienPos.setColisionBoundary(alienPos.x+40, alienPos.y+40, 130, 120);
 	}
-	public Alien(float x, float y) {
-		alienPos = new Position(x, y);
+	public Alien(float x, float y, float s) {
+		alienPos = new Position(x, y, s);
 		alienPos.setColisionBoundary(alienPos.x+40, alienPos.y+40, 130, 120);
 	}
-	public Alien(float x, float y, int w, int h) {
-		alienPos = new Position(x, y, w, h);
+	public Alien(float x, float y, int w, int h, float s) {
+		alienPos = new Position(x, y, w, h, s);
 		alienPos.setColisionBoundary(alienPos.x+40, alienPos.y+40, 130, 120);
 	}
 	
@@ -41,7 +43,7 @@ public class Alien {
 	
 	public void shoot() {
 		if(timeCount > 250) {
-			alienBullets.add(new Bullet(alienPos.collision_x+(alienPos.collision_width/2), alienPos.collision_y+(alienPos.collision_height/2)));
+			alienBullets.add(new Bullet(alienPos.collision_x+(alienPos.collision_width/2), alienPos.collision_y+(alienPos.collision_height/2), alienPos.speed, alienDmg, false  ));
 			alienBullets.get(alienBullets.size()-1).bulletPos.setColisionBoundary(alienPos.collision_x+(alienPos.collision_width/2), alienPos.collision_y+(alienPos.collision_height/2), 15, 30);
 			timeCount = 0;
 		}

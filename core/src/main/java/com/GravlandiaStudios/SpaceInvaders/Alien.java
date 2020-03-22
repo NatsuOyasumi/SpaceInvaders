@@ -8,12 +8,13 @@ import com.badlogic.gdx.graphics.Texture;
 
 public class Alien {
 	
-	public Texture alienShip = SpaceInvaders.alienTexture;//200w x 175h
+	public Texture alienShip = SpaceInvaders.alienTexture;//200w x 175h,  90cw x 80ch
 	public Position alienPos;
 	public ArrayList<Bullet> alienBullets = new ArrayList<Bullet>();
 	public int timeCount = (int)(Math.random()*394820) % 250;
 	public int alienHP = 30;//100	
 	public int alienDmg = 7;
+	public boolean damaged = false; public int Dtimer = 0;
 	
 	public Alien() {
 		alienPos = new Position();
@@ -56,13 +57,27 @@ public class Alien {
 		deleteUsedBullets();
 	}
 
-	public ArrayList<Bullet> takeDamage(ArrayList<Bullet> playerBullets) {
+	public ArrayList<Bullet> takeDamage(ArrayList<Bullet> playerBullets, boolean unbreaking, int row) {
 		//take damage from player's bullets, return ArrayList so player can delete bullets
 		for(int i = 0; i < playerBullets.size(); i++) {
-			if(alienPos.overlapping(playerBullets.get(i).bulletPos)) {
+			//only affect if 1 overlapping and 2 hasn't affected yet
+			if( (alienPos.overlapping(playerBullets.get(i).bulletPos)) && ( (row == 1 && playerBullets.get(i).hitTopRow == false) || (row == 2 && playerBullets.get(i).hitMidRow == false) || (row == 3 && playerBullets.get(i).hitLowRow == false) ) ) {
 				alienHP -= playerBullets.get(i).damage;
-				playerBullets.remove(i);
-				i--;
+				if(!unbreaking) {
+					//not organized great, but otherwise it's removing it anyway...
+					playerBullets.remove(i);
+					i--;
+				}
+				else {
+					//unbreaking
+					if(row == 3)
+						playerBullets.get(i).hitLowRow = true;
+					else if(row == 2)
+						playerBullets.get(i).hitMidRow = true;
+					else if(row == 1)
+						playerBullets.get(i).hitTopRow = true;
+					damaged = true;
+				}
 			}
 		}
 
@@ -81,6 +96,12 @@ public class Alien {
 	
 	public void render(Graphics g) {
 		g.drawTexture(alienShip, alienPos.x, alienPos.y);
+		if(damaged) {
+			//g.drawString("Took Damage", 50+alienPos.x, 800+alienPos.y);
+			Dtimer++;
+			if(Dtimer >= 50)
+				damaged = false;
+		}
 	}
 	public void renderBullets(Graphics g) {
 		for(Bullet b: alienBullets) {

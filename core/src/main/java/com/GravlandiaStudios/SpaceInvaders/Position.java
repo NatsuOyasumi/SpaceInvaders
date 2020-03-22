@@ -15,6 +15,7 @@ public class Position {
 	public float speed = 5;//default
 	
 	public boolean offScreen = false;//for bullets specifically
+	public boolean doNotSetOffScreen = false;
 	
 	public Position() {
 		//default is alien
@@ -49,7 +50,7 @@ public class Position {
 		collision_width = in_width;
 		collision_height = in_height;
 	}
-	
+
 	public boolean checkOnScreen() {
 		//shouldn't be able to go out of screen at all
 		if(collision_x > 0 && collision_y > 0 && collision_x+collision_width < SpaceInvaders.WINDOW_WIDTH && collision_y+collision_height < SpaceInvaders.WINDOW_HEIGHT) {
@@ -63,7 +64,7 @@ public class Position {
 	public void moveLeft() {
 		x -= speed;
 		collision_x -= speed;
-		if(checkOnScreen() == false) {
+		if(checkOnScreen() == false && doNotSetOffScreen == false) {
 			x += speed;
 			collision_x += speed;
 			offScreen = true;
@@ -72,7 +73,7 @@ public class Position {
 	public void moveRight() {
 		x += speed;
 		collision_x += speed;
-		if(checkOnScreen() == false) {
+		if(checkOnScreen() == false && doNotSetOffScreen == false) {
 			x -= speed;
 			collision_x -= speed;
 			offScreen = true;
@@ -81,16 +82,21 @@ public class Position {
 	public void moveUp() {
 		y -= speed;
 		collision_y -= speed;
-		if(checkOnScreen() == false) {
+		if(checkOnScreen() == false && doNotSetOffScreen == false) {
 			y += speed;
 			collision_y += speed;
 			offScreen = true;
+			if(checkOnScreen() == false && doNotSetOffScreen == false) {
+				y += speed;
+				collision_y += speed;
+				offScreen = true;
+			}
 		}
 	}
 	public void moveDown() {
 		y += speed;
 		collision_y += speed;
-		if(checkOnScreen() == false) {
+		if(checkOnScreen() == false && doNotSetOffScreen == false) {
 			y -= speed;
 			collision_y -= speed;
 			offScreen = true;
@@ -114,4 +120,5 @@ public class Position {
 		}
 		return b;
 	}
+	
 }

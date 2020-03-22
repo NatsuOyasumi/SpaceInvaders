@@ -1,6 +1,7 @@
 package com.GravlandiaStudios.SpaceInvaders;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -28,9 +29,16 @@ public class SpaceInvaders extends BasicGame {
 	public Ship player;
 	public ArrayList<Alien> enemies;
 	public int numEnemiesAcross = 7;
+	public ArrayList<PowerUp> powerUps;
 
 	public static Texture bulletTexture;//so not creating for each bullet/alien
 	public static Texture alienTexture;
+	public static Texture speedPowerUpTexture;
+	public static Texture infinitebulletPowerUpTexture;
+	public static Texture unbreakingBulletPowerUpTexture;
+	public static Texture reboundingBulletPowerUpTexture;
+	public static Texture armorPiercingBulletPowerUpTexture;
+	public static Texture indestructiblePowerUp;
 
 	public static int alienSpeed = 5;
 	public static int playerSpeed = 7;
@@ -47,17 +55,30 @@ public class SpaceInvaders extends BasicGame {
 	
 	
 	public int maxNumOfEnemies = 21;//3 rows. Consider doing 2 rows max.
+	
+	public double chanceOfDroppingPowerUp = 0.25;
 
 	@Override
 	public void initialise() {
 		alienTexture = new Texture("alien.JPG");
 		bulletTexture = new Texture("bullet.png");
+		speedPowerUpTexture = new Texture("Speed Powerup.png");
+		infinitebulletPowerUpTexture = new Texture("Infinite Bullets Powerup.png");
+		unbreakingBulletPowerUpTexture = new Texture("Unbreaking Bullets Powerup.png");
+		reboundingBulletPowerUpTexture = new Texture("Rebound Powerup.png");
+		armorPiercingBulletPowerUpTexture = new Texture("Armor Piercing Powerup.png");
+		indestructiblePowerUp = new Texture("Indestructible Powerup.png");
 		player = new Ship();
 		enemies = new ArrayList<Alien>();
+		powerUps = new ArrayList<PowerUp>();
 	}
 
 	@Override
 	public void update(float delta) {
+		if(Gdx.input.isKeyJustPressed(Keys.A)) {
+			generatePowerUp(new Position(), 3);
+		}
+		
 		tempCounter++;
 		if(player.died == false) {
 			updateFurthestLeftRight();//if set -1, will fix here...
@@ -105,7 +126,18 @@ public class SpaceInvaders extends BasicGame {
 			//update enemies
 			for(int i = 0; i < enemies.size(); i++) {
 				//take damage, then shoot (if not destroyed)
-				ArrayList<Bullet> temp = enemies.get(i).takeDamage(player.shipBullets);//need to be able to access player bullets
+				int row = 0;
+				if(topRowStart <= i && i <= topRowEnd)
+					row = 1;
+				else if(midRowStart <= i && i <= midRowEnd)
+					row = 2;
+				else if(lowRowStart <= i && i <= lowRowEnd)
+					row = 3;
+				
+				//I think sending in the ArrayList makes changes directly to list, so send copy
+				ArrayList<Bullet> copy = player.shipBullets;
+				
+				ArrayList<Bullet> temp = enemies.get(i).takeDamage(copy, player.unbreakingBulletPowerUp, row);//need to be able to access player bullets
 				player.deleteUsedBullets(temp);
 				if(enemies.get(i).alienHP <= 0) {
 					//will change row vals as size/positions update
@@ -123,6 +155,12 @@ public class SpaceInvaders extends BasicGame {
 					if(i <= lowRowEnd)
 						lowRowEnd--;
 					
+					//possibly drop powerup (before position is deleted)
+					double percentage = Math.random();
+					if(percentage <= chanceOfDroppingPowerUp) {
+						generatePowerUp(enemies.get(i).alienPos);
+					}
+					
 					//remove enemy
 					enemies.remove(i);
 					i--;
@@ -132,6 +170,24 @@ public class SpaceInvaders extends BasicGame {
 					enemies.get(i).update();	
 				}
 			}//for all enemies
+			
+			for(int i = 0; i < powerUps.size(); i++) {
+				PowerUp p = powerUps.get(i);//smaller to call...  -_-
+				if(player.shipPos.overlapping(p.powerPos) && p.pickedUp == false) {
+					p.pickedUp = true;
+					player.addPowerUp(p);
+					player.activatePowerUp(p.identifier);
+					powerUps.remove(p);
+				}
+				else if(p.powerPos.offScreen) {
+					powerUps.remove(i);
+				}
+				else {
+					//else b/c when picking up, don't immediately decrease timer, so don't update.
+					p.update();
+					//p.textPosition = i;//in ship
+				}
+			}//for all powerups
 
 			calcPlayerDamage();
 
@@ -157,8 +213,9 @@ public class SpaceInvaders extends BasicGame {
 		//Top Row
 		if( (topRowStart > -1 && topRowEnd > -1) 
 				&& (topRowStart < enemies.size() && topRowEnd < enemies.size()) ) {
-			if(tempCounter%35 == 0) 
-				System.out.println("moving top " + topRowEnd);
+			if(tempCounter%35 == 0) {
+				//System.out.println("moving top " + topRowEnd);
+			}
 			if(enemiesMoveRight0) {
 				for(int i = 0; i <= topRowEnd && i < enemies.size(); i++) {
 					enemies.get(i).alienPos.moveRight();
@@ -177,14 +234,15 @@ public class SpaceInvaders extends BasicGame {
 			}
 		}//if top row ends are still in list
 		else {
-			System.out.println("top " + (topRowStart > -1) + " " + (topRowEnd > -1) + " " + (topRowStart < enemies.size()) + " " + (topRowEnd < enemies.size()));
+			//System.out.println("top " + (topRowStart > -1) + " " + (topRowEnd > -1) + " " + (topRowStart < enemies.size()) + " " + (topRowEnd < enemies.size()));
 		}
 
 		//Second row
 		if( (midRowStart > -1 && midRowEnd > -1) 
 				&& (midRowStart < enemies.size() && midRowEnd < enemies.size()) ) {
-			if(tempCounter%35 == 0) 
-				System.out.println("moving mid " + midRowStart + " " + midRowEnd);
+			if(tempCounter%35 == 0) {
+				//System.out.println("moving mid " + midRowStart + " " + midRowEnd);
+			}
 			if(enemiesMoveRight1) {
 				for(int i = midRowStart; i <= midRowEnd && i < enemies.size(); i++) {
 					enemies.get(i).alienPos.moveRight();
@@ -203,6 +261,7 @@ public class SpaceInvaders extends BasicGame {
 			}
 		}//if middle/2nd row ends are still in list
 		else {
+			/*
 			if(tempCounter%35 == 0) {
 				System.out.print("mid " + (midRowStart > -1) + " " + (midRowEnd > -1) + " " + (midRowStart < enemies.size()) + " " + (midRowEnd < enemies.size()));
 				if(!(midRowStart > -1))
@@ -215,13 +274,15 @@ public class SpaceInvaders extends BasicGame {
 					System.out.print(" " + midRowEnd);
 				System.out.println();
 			}
+			*/
 		}
 
 		//Third row
 		if( (lowRowStart > -1 && lowRowEnd > -1) 
 				&& (lowRowStart < enemies.size() && lowRowEnd < enemies.size()) ) {
-			if(tempCounter%35 == 0) 
-				System.out.println("moving low " + lowRowStart + " " + lowRowEnd);
+			if(tempCounter%35 == 0) {
+				//System.out.println("moving low " + lowRowStart + " " + lowRowEnd);
+			}
 			if(enemiesMoveRight2) {
 				for(int i = lowRowStart; i <= lowRowEnd && i < enemies.size(); i++) {
 					enemies.get(i).alienPos.moveRight();
@@ -240,7 +301,7 @@ public class SpaceInvaders extends BasicGame {
 			}
 		}//if bottom/3rd row ends are still in list
 		else {
-			System.out.println("low " + (lowRowStart > -1) + " " + (lowRowEnd > -1) + " " + (lowRowStart < enemies.size()) + " " + (lowRowEnd < enemies.size()));
+			//System.out.println("low " + (lowRowStart > -1) + " " + (lowRowEnd > -1) + " " + (lowRowStart < enemies.size()) + " " + (lowRowEnd < enemies.size()));
 		}
 	}//move enemies
 
@@ -251,7 +312,9 @@ public class SpaceInvaders extends BasicGame {
 			for(int j = 0; j < enemies.get(i).alienBullets.size(); j++) {
 				//for each bullet for each enemy
 				if(player.shipPos.overlapping(enemies.get(i).alienBullets.get(j).bulletPos)) {
-					player.shipHP -= enemies.get(i).alienBullets.get(j).damage;
+					if(player.indestructiblePowerUp == false) {
+						player.shipHP -= enemies.get(i).alienBullets.get(j).damage;
+					}
 					enemies.get(i).alienBullets.remove(j);
 					j--;
 				}
@@ -272,6 +335,7 @@ public class SpaceInvaders extends BasicGame {
 			g.drawString("Every time I say guh, that means bullet.", ((WINDOW_WIDTH/2)-400)/scale, (WINDOW_HEIGHT-8)/scale);
 			g.clearScaling();
 		}
+		
 		if(player.lives > 0) { //-1?
 			for(Alien a: enemies) {
 				a.render(g);
@@ -279,6 +343,10 @@ public class SpaceInvaders extends BasicGame {
 			}
 			//player last so on top
 			player.render(g);
+			
+			for(PowerUp p: powerUps) {
+				p.render(g);//if these are before player, the black background covers them up
+			}
 
 			//but actually bullets on top of everything
 			for(Alien a: enemies) {
@@ -322,30 +390,35 @@ public class SpaceInvaders extends BasicGame {
 			float x_min1 = 2000;
 			float x_max2 = 0;
 			float x_min2 = 2000;
+			/*
 			if(tempCounter%35 == 0) {
 			System.out.println("\n\nStart \n" + enemies.size());
 			System.out.println("top " + topRowStart + " " + topRowEnd);
 			System.out.println("mid " + midRowStart + " " + midRowEnd);
 			System.out.println("low " + lowRowStart + " " + lowRowEnd);
 			}
+			*/
 			for(int i = 0; i < enemies.size(); i++) {
-				if(tempCounter%35 == 0)
-					System.out.print(i);
+				if(tempCounter%35 == 0) {
+					//System.out.print(i);
+				}
 				if(enemies.get(i).alienPos.y == 15) {
 					if(enemies.get(i).alienPos.x >= x_max0) {
 						//topRowEnd = i%numEnemiesAcross;
 						topRowEnd = i;
 						x_max0 = enemies.get(i).alienPos.x;
 						//topRowEnd = i;
-						if(tempCounter%35 == 0) 
-							System.out.println(" topRowEnd");
+						if(tempCounter%35 == 0) {
+							//System.out.println(" topRowEnd");
+						}
 					}//if further right / max
 					if(enemies.get(i).alienPos.x <= x_min0) {
 						//topRowStart = i%numEnemiesAcross;
 						topRowStart = i;
 						x_min0 = enemies.get(i).alienPos.x;
-						if(tempCounter%35 == 0) 
-							System.out.println(" topRowStart");
+						if(tempCounter%35 == 0) {
+							//System.out.println(" topRowStart");
+						}
 					}//if further left / min
 				}//1st/top row
 				else if(enemies.get(i).alienPos.y == 195) {
@@ -353,15 +426,17 @@ public class SpaceInvaders extends BasicGame {
 						//midRowEnd = (i%numEnemiesAcross) + 7;//i%num == 0, i = 7
 						midRowEnd = i;
 						x_max1 = enemies.get(i).alienPos.x;
-						if(tempCounter%35 == 0) 
-							System.out.println(" midRowEnd");
+						if(tempCounter%35 == 0) {
+							//System.out.println(" midRowEnd");
+						}
 					}//if further right / max
 					if(enemies.get(i).alienPos.x <= x_min1) {
 						//midRowStart = (i%numEnemiesAcross) + 7;
 						midRowStart = i;
 						x_min1 = enemies.get(i).alienPos.x;
-						if(tempCounter%35 == 0) 
-							System.out.println(" midRowStart");
+						if(tempCounter%35 == 0) {
+							//System.out.println(" midRowStart");
+						}
 					}//if further left / min
 				}//2nd row
 				else if(enemies.get(i).alienPos.y == 375) {
@@ -369,20 +444,23 @@ public class SpaceInvaders extends BasicGame {
 						//lowRowEnd = (i%numEnemiesAcross) + 14;//first is 14
 						lowRowEnd = i;
 						x_max2 = enemies.get(i).alienPos.x;
-						if(tempCounter%35 == 0) 
-							System.out.println(" lowRowEnd");
+						if(tempCounter%35 == 0) {
+							//System.out.println(" lowRowEnd");
+						}
 					}//if further right / max
 					if(enemies.get(i).alienPos.x <= x_min2) {
 						//lowRowStart = (i%numEnemiesAcross) + 14;
 						lowRowStart = i;
 						x_min2 = enemies.get(i).alienPos.x;
-						if(tempCounter%35 == 0) 
-							System.out.println(" lowRowStart");
+						if(tempCounter%35 == 0) {
+							//System.out.println(" lowRowStart");
+						}
 					}//if further left / min
 				}//3rd row
 				else {
-					if(tempCounter%35 == 0)
-						System.out.println("*** Was greater than lowRowEnd " + lowRowEnd);
+					if(tempCounter%35 == 0) {
+						//System.out.println("*** Was greater than lowRowEnd " + lowRowEnd);
+					}
 				}
 			}//for all enemies
 		}//else size > 1
@@ -397,4 +475,33 @@ public class SpaceInvaders extends BasicGame {
 			lowRowEnd = topRowEnd;//prob no second row yet
 		*/
 	}//update furthest left/right
+	
+	public void generatePowerUp(Position p) {
+		/*
+		1 speed PowerUp (ship / bullets move faster)
+		2 infinite bullets (laser... :D)
+		3 unbreaking bullets (can hit multiple aliens)
+		4 rebounding - bounce off edge of screen
+		5 armor piercing - one-hit KO
+		6 indestructible - ship doesn't take damage
+		*/
+		
+		int powerIdentifier = (((int)(Math.random()*3820028))%6)+1;
+		powerUps.add(new PowerUp(p, powerIdentifier, powerUps.size()+1));
+	}//generatePowerUp
+	
+	public void generatePowerUp(Position p, int PI) {
+		/*
+		1 speed PowerUp (ship / bullets move faster)
+		2 infinite bullets (laser... :D)
+		3 unbreaking bullets (can hit multiple aliens)
+		4 rebounding - bounce off edge of screen
+		5 armor piercing - one-hit KO
+		6 indestructible - ship doesn't take damage
+		*/
+		
+		//int powerIdentifier = (((int)(Math.random()*3820028))%6)+1;
+		powerUps.add(new PowerUp(p, PI, powerUps.size()+1));
+	}//generatePowerUp
+	
 }

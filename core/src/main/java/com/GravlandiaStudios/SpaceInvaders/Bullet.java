@@ -14,6 +14,12 @@ public class Bullet {
 	public boolean fromPlayer = false;//otherwise need to invert texture
 	public boolean drawBulletTailSetting;
 	public float bulletSpeed = 7;
+	public boolean flip;
+	
+	//If unbreaking, hit an alien only once
+	public boolean hitLowRow = false;
+	public boolean hitMidRow = false;
+	public boolean hitTopRow = false;
 	
 	public Bullet() {
 		bulletPos = new Position();
@@ -63,7 +69,12 @@ public class Bullet {
 	public void render(Graphics g) {
 		if(SpaceInvaders.bulletTextTexture == false) {
 			if(fromPlayer) {
-				g.drawTexture(bulletTexture, bulletPos.x, bulletPos.y);
+				if(flip) {
+					g.drawTexture(bulletTexture, bulletPos.x, bulletPos.y, false);
+				}
+				else {
+					g.drawTexture(bulletTexture, bulletPos.x, bulletPos.y);
+				}
 			}
 			else {
 				//true for flipping vertically does not flip...
@@ -117,6 +128,17 @@ public class Bullet {
 	public String boundaryCheck() {
 		//System.out.println(bulletPos.collision_y-bulletPos.y);
 		return "" + (bulletPos.toString()) + "\n";
+	}
+	
+	public void toggleFlip() {
+		flip = !flip;
+		bulletSpeed *= -1;
+		bulletPos.speed *= -1;
+		System.out.println("REBOUND!!! " + bulletPos.offScreen);
+		
+		hitLowRow = false;
+		hitMidRow = false;
+		hitTopRow = false;
 	}
 	
 }

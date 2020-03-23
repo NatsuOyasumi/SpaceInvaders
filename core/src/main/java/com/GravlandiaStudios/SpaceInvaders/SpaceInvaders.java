@@ -12,7 +12,7 @@ import org.mini2Dx.core.graphics.Graphics;
 public class SpaceInvaders extends BasicGame {
 	public static final String GAME_IDENTIFIER = "com.GravlandiaStudios.SpaceInvaders";
 	public static final int WINDOW_WIDTH = 1920;
-	public static final int WINDOW_HEIGHT = 1020;
+	public static final int WINDOW_HEIGHT = 1080;//1020;
 	public static int highScore = 412300;
 
 	public boolean enemiesMoveRight0 = true;
@@ -75,8 +75,12 @@ public class SpaceInvaders extends BasicGame {
 
 	@Override
 	public void update(float delta) {
-		if(Gdx.input.isKeyJustPressed(Keys.A)) {
-			generatePowerUp(new Position(), 3);
+		if(Gdx.input.isKeyJustPressed(Keys.Q)) {
+			generatePowerUp(new Position(true));
+		}
+		while(powerUps.size() > 5) { //8 looks like a lot
+			player.gold += 15;
+			powerUps.remove(powerUps.size()-1);
 		}
 		
 		tempCounter++;
@@ -165,6 +169,7 @@ public class SpaceInvaders extends BasicGame {
 					enemies.remove(i);
 					i--;
 					player.score += 25;
+					player.gold += 7;
 				}//if 0 HP
 				else { 
 					enemies.get(i).update();	

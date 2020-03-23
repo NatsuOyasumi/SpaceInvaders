@@ -28,6 +28,20 @@ public class Position {
 		collision_width = 130;
 		collision_height = 120;
 	}
+	public Position(boolean random) {
+		//just make a random one, boolean so distinct
+		//this is specifically for powerups
+		while(x < 15 || x > 1900)
+			x = (float)((Math.random()*29472345)%1900);
+		while(y < 15 || y > 300)
+			y = (float)((Math.random()*29472345)%300);
+		width = 64;
+		height = 64;
+		collision_x = x;
+		collision_y = y;
+		collision_width = 64;
+		collision_height = 64;
+	}
 	public Position(float in_x, float in_y, float s) {
 		x = in_x;
 		y = in_y;
@@ -53,8 +67,9 @@ public class Position {
 
 	public boolean checkOnScreen() {
 		//shouldn't be able to go out of screen at all
-		if(collision_x > 0 && collision_y > 0 && collision_x+collision_width < SpaceInvaders.WINDOW_WIDTH && collision_y+collision_height < SpaceInvaders.WINDOW_HEIGHT) {
+		if(collision_x > 0 && collision_y > 0 && collision_x+collision_width < SpaceInvaders.WINDOW_WIDTH && collision_y+collision_height < SpaceInvaders.WINDOW_HEIGHT-100) {
 			return true;
+			//Can't go all the way to bottom of the screen by the way
 		}
 		else {
 			return false;

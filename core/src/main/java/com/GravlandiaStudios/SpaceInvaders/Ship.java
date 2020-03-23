@@ -41,11 +41,13 @@ public class Ship {
 	
 	public ArrayList<PowerUp> shipPowerUps = new ArrayList<PowerUp>();//I'm ready to cry
 	
+	public int gold = 0;
+	
 	//*****If speed powerup, double speed, but only 1/2 it once before setting powerup false
 	
 	public Ship() {
 		shipTexture = new Texture("ship.jpg");
-		shipPos = new Position(SpaceInvaders.WINDOW_WIDTH/2, SpaceInvaders.WINDOW_HEIGHT-180, 200, 175, SpaceInvaders.playerSpeed);
+		shipPos = new Position(SpaceInvaders.WINDOW_WIDTH/2, (SpaceInvaders.WINDOW_HEIGHT/2)+100, 200, 175, SpaceInvaders.playerSpeed);
 		shipPos.setColisionBoundary(shipPos.x+50, shipPos.y+20, 95, 150);
 		shipBullets = new ArrayList<Bullet>();
 	}
@@ -167,14 +169,18 @@ public class Ship {
 		
 		//I want this regardless...
 		if(lives == 1) {
-			g.drawString(lives + " life", 10, SpaceInvaders.WINDOW_HEIGHT-25);
+			g.drawString(lives + " life", 10, SpaceInvaders.WINDOW_HEIGHT-45);
 		}
 		else {
-			g.drawString(lives + " lives", 10, SpaceInvaders.WINDOW_HEIGHT-25);
+			g.drawString(lives + " lives", 10, SpaceInvaders.WINDOW_HEIGHT-45);
 		}
 		renderHPBar(g);
-		g.drawString(score + " points", SpaceInvaders.WINDOW_WIDTH-100, SpaceInvaders.WINDOW_HEIGHT-25);
-	}
+		
+		g.drawString(score + " points", SpaceInvaders.WINDOW_WIDTH-200, SpaceInvaders.WINDOW_HEIGHT-45);
+		g.setColor(Color.GOLD);
+		g.drawString(gold + " gold", SpaceInvaders.WINDOW_WIDTH-200, SpaceInvaders.WINDOW_HEIGHT-25);
+		g.setColor(Color.WHITE);
+	}//end render
 	public void renderBullets(Graphics g) {
 		for(Bullet b: shipBullets) {
 			b.render(g);
@@ -186,11 +192,11 @@ public class Ship {
 
 	public void renderHPBar(Graphics g) {
 		g.setColor(Color.WHITE);
-		g.drawRect(9, SpaceInvaders.WINDOW_HEIGHT-16, 102, 12);
+		g.drawRect(9f, SpaceInvaders.WINDOW_HEIGHT-26, 102, 12);
 		//HP is 50
 		float percentage = (float)((shipHP/50.0)*100);//*100 to make out of 100 percent instead of decimal
 		g.setColor(Color.BLUE);
-		g.fillRect(10f, (SpaceInvaders.WINDOW_HEIGHT-15), percentage, 10f);
+		g.fillRect(10f, (SpaceInvaders.WINDOW_HEIGHT-25), percentage, 10f);
 		g.setColor(Color.WHITE);
 	}
 	

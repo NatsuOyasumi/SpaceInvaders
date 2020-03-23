@@ -134,7 +134,7 @@ public class Bullet {
 		flip = !flip;
 		bulletSpeed *= -1;
 		bulletPos.speed *= -1;
-		System.out.println("REBOUND!!! " + bulletPos.offScreen);
+		//System.out.println("REBOUND!!! " + bulletPos.offScreen);
 		
 		hitLowRow = false;
 		hitMidRow = false;

@@ -15,6 +15,8 @@ public class DesktopLauncher {
 		config.width = SpaceInvaders.WINDOW_WIDTH;
 		config.height = SpaceInvaders.WINDOW_HEIGHT;
 		
+		//config.title changes name of game window.
+		
 		config.fullscreen = true;
 		
 		config.vSyncEnabled = true;

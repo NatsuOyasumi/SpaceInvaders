@@ -334,6 +334,12 @@ public class SpaceInvaders extends BasicGame {
 
 	@Override
 	public void render(Graphics g) {
+		//temp - fix this later? Still some flickering of powerups, not sure why
+		while(powerUps.size() > 5) { //8 looks like a lot
+			player.gold += 15;
+			powerUps.remove(powerUps.size()-1);
+		}
+		
 		if(displayMessage) {
 			int scale = 3;
 			g.setScale(scale, scale);
@@ -492,7 +498,12 @@ public class SpaceInvaders extends BasicGame {
 		*/
 		
 		int powerIdentifier = (((int)(Math.random()*3820028))%6)+1;
-		powerUps.add(new PowerUp(p, powerIdentifier, powerUps.size()+1));
+		if(powerUps.size() <= 5) { //8 looks like a lot
+			powerUps.add(new PowerUp(p, powerIdentifier, powerUps.size()+1));
+		}
+		else {
+			player.gold += 15;
+		}
 	}//generatePowerUp
 	
 	public void generatePowerUp(Position p, int PI) {
